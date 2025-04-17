@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Supabase To-Do App</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, button { margin: 10px 0; padding: 5px; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h1>My To-Do List</h1>
+  <input type="text" id="taskInput" placeholder="Enter a task">
+  <button onclick="addTask()">Add Task</button>
+  <ul id="taskList"></ul>
+
+  <!-- Include Supabase JavaScript library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Initialize Supabase client
+    const supabaseUrl = 'https://vdoxinfjnsnteptjyuwa.supabase.co'; // e.g., https://<your-project-ref>.supabase.co
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkb3hpbmZqbnNudGVwdGp5dXdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5MTk3OTYsImV4cCI6MjA2MDQ5NTc5Nn0.zBXf5oRe4w_8FhWTp_oBDWTePfmCSzQTdAXYI-Yz0X8
+'; // Your anon public key
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Fetch and display tasks
+    async function loadTasks() {
+      const { data, error } = await supabase
+        .from('todos')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) {
+        console.error('Error fetching tasks:', error);
+        return;
+      }
+      const taskList = document.getElementById('taskList');
+      taskList.innerHTML = '';
+      data.forEach(task => {
+        const li = document.createElement('li');
+        li.textContent = task.task;
+        taskList.appendChild(li);
+      });
+    }
+
+    // Add a new task
+    async function addTask() {
+      const taskInput = document.getElementById('taskInput');
+      const taskText = taskInput.value.trim();
+      if (!taskText) {
+        alert('Please enter a task!');
+        return;
+      }
+      const { error } = await supabase
+        .from('todos')
+        .insert([{ task: taskText }]);
+      if (error) {
+        console.error('Error adding task:', error);
+        return;
+      }
+      taskInput.value = '';
+      loadTasks();
+    }
+
+    // Load tasks when the page loads
+    loadTasks();
+  </script>
+</body>
+</html>
