@@ -17,75 +17,76 @@
   <button onclick="addTask()">Add Task</button>
   <ul id="taskList"></ul>
 
-  <!-- Include Supabase JavaScript library -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Include Supabase JavaScript library (specific version) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script>
-<script>
-  // Initialize Supabase client
-  const supabaseUrl = 'https://vdoxinfjnsnteptjyuwa.supabase.co
+    // Initialize Supabase client
+    const supabaseUrl = 'https://vdoxinfjnsnteptjyuwa.supabase.co
 '; // e.g., https://xyz123.supabase.co
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkb3hpbmZqbnNudGVwdGp5dXdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5MTk3OTYsImV4cCI6MjA2MDQ5NTc5Nn0.zBXf5oRe4w_8FhWTp_oBDWTePfmCSzQTdAXYI-Yz0X8
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkb3hpbmZqbnNudGVwdGp5dXdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5MTk3OTYsImV4cCI6MjA2MDQ5NTc5Nn0.zBXf5oRe4w_8FhWTp_oBDWTePfmCSzQTdAXYI-Yz0X8
 '; // Your anon public key
-  const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  // Log to confirm Supabase initialized
-  console.log('Supabase client initialized:', supabase);
+    // Log to confirm Supabase initialized
+    console.log('Supabase client initialized:', supabase);
 
-  // Fetch and display tasks
-  async function loadTasks() {
-    try {
-      const { data, error } = await supabase
-        .from('todos')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) {
-        console.error('Error fetching tasks:', error);
-        alert('Failed to load tasks: ' + error.message);
-        return;
+    // Fetch and display tasks
+    async function loadTasks() {
+      try {
+        const { data, error } = await supabase
+          .from('todos')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (error) {
+          console.error('Error fetching tasks:', error);
+          alert('Failed to load tasks: ' + error.message);
+          return;
+        }
+        const taskList = document.getElementById('taskList');
+        taskList.innerHTML = '';
+        if (data.length === 0) {
+          taskList.innerHTML = '<li>No tasks yet!</li>';
+        } else {
+          data.forEach(task => {
+            const li = document.createElement('li');
+            li.textContent = task.task;
+            taskList.appendChild(li);
+          });
+        }
+      } catch (err) {
+        console.error('Unexpected error:', err);
+        alert('Unexpected error loading tasks: ' + err.message);
       }
-      const taskList = document.getElementById('taskList');
-      taskList.innerHTML = '';
-      if (data.length === 0) {
-        taskList.innerHTML = '<li>No tasks yet!</li>';
-      } else {
-        data.forEach(task => {
-          const li = document.createElement('li');
-          li.textContent = task.task;
-          taskList.appendChild(li);
-        });
-      }
-    } catch (err) {
-      console.error('Unexpected error:', err);
-      alert('Unexpected error loading tasks: ' + err.message);
     }
-  }
 
-  // Add a new task
-  async function addTask() {
-    try {
-      const taskInput = document.getElementById('taskInput');
-      const taskText = taskInput.value.trim();
-      if (!taskText) {
-        alert('Please enter a task!');
-        return;
+    // Add a new task
+    async function addTask() {
+      try {
+        const taskInput = document.getElementById('taskInput');
+        const taskText = taskInput.value.trim();
+        if (!taskText) {
+          alert('Please enter a task!');
+          return;
+        }
+        const { error } = await supabase
+          .from('todos')
+          .insert([{ task: taskText }]);
+        if (error) {
+          console.error('Error adding task:', error);
+          alert('Failed to add task: ' + error.message);
+          return;
+        }
+        alert('Task added successfully!');
+        taskInput.value = '';
+        loadTasks();
+      } catch (err) {
+        console.error('Unexpected error:', err);
+        alert('Unexpected error adăug task: ' + err.message);
       }
-      const { error } = await supabase
-        .from('todos')
-        .insert([{ task: taskText }]);
-      if (error) {
-        console.error('Error adding task:', error);
-        alert('Failed to add task: ' + error.message);
-        return;
-      }
-      alert('Task added successfully!');
-      taskInput.value = '';
-      loadTasks();
-    } catch (err) {
-      console.error('Unexpected error:', err);
-      alert('Unexpected error adding task: ' + err.message);
     }
-  }
 
-  // Load tasks when the page loads
-  loadTasks();
-</script>
+    // Load tasks when the page loads
+    loadTasks();
+  </script>
+</body>
+</html>
